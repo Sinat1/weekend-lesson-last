@@ -17,7 +17,11 @@ const http = require("http").Server(app);
 //     origin: "http://localhost:8080/",
 //   },
 // });
-const socket = require("socket.io")(http);
+const socket = require("socket.io")(http, {
+  cors: {
+    origin: "https://weekend-lesson-last-frontend.onrender.com",
+  },
+});
 global.usersOnline = new Map();
 socket.on("connection", (client) => {
   console.log("connection");
