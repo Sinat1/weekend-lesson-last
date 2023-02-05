@@ -9,7 +9,8 @@ app.use(cors());
 const http = require("http").Server(app);
 
 const socket = require("socket.io")(http, {
-  cors: "https://weekend-lesson-last-frontend.onrender.com",
+  // cors: "https://weekend-lesson-last-frontend.onrender.com",
+  cors: "http://localhost:8080/",
 });
 
 global.onlineUsers = new Map();
