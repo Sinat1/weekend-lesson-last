@@ -1,46 +1,38 @@
-const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
+const mongoose = require("mongoose");
+const express = require("express");
 
 require("dotenv").config();
 
 const app = express();
-
 app.use(cors());
-
-const { PORT, HOST_URI } = process.env;
-const { findAllMessages, createMessage } = require("./services/messageFunc");
 const http = require("http").Server(app);
-mongoose.connect(HOST_URI, () => console.log("Database connection successful"));
-// const socket = require("socket.io")(http, {
-//   cors: {
-//     origin: "http://localhost:8080/",
-//   },
-// });
+
 const socket = require("socket.io")(http, {
-  cors: {
-    origin: "https://weekend-lesson-last-frontend.onrender.com",
-  },
+  cors: "https://weekend-lesson-last-frontend.onrender.com",
 });
 
-global.usersOnline = new Map();
-socket.on("connection", async (client) => {
-  client.on("Add new user", async (name) => {
-    usersOnline.set(client.id, name);
-    client.emit("Changed online", usersOnline.size);
-    client.broadcast.emit("Changed online", usersOnline.size);
-    const messagesList = await findAllMessages();
-    client.emit("fetch messages", messagesList);
+global.onlineUsers = new Map();
+
+socket.on("connection", (user) => {
+  user.emit("changeOnline", onlineUsers.size);
+  console.log("Connected");
+  // user.broadcast.emit("changeOnline", onlineUsers.size);
+  user.on("addUser", (data) => {
+    onlineUsers.set(user.id, data.name);
+    user.emit("changeOnline", onlineUsers.size);
+    user.broadcast.emit("changeOnline", onlineUsers.size);
   });
-  client.on("New Message", async (message) => {
-    const res = await createMessage(message);
-    client.broadcast.emit("Update message list", res);
-    client.emit("Update message list", res);
+  user.on("newMessage", (message) => {
+    console.log(message);
+    user.broadcast.emit("showMessage", message);
   });
-  client.on("disconnect", () => {
-    usersOnline.delete(client.id);
-    client.broadcast.emit("Changed online", usersOnline.size);
+  user.on("disconnect", () => {
+    onlineUsers.delete(user.id);
+    user.broadcast.emit("changeOnline", onlineUsers.size);
   });
 });
 
-http.listen(PORT, () => console.log("Server is running on port 3001"));
+const { PORT } = process.env;
+
+http.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
