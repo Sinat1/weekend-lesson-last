@@ -17,12 +17,12 @@ mongoose.connect(HOST_URI, () => console.log("Database connection successful"));
 //     origin: "http://localhost:8080/",
 //   },
 // });
-// const socket = require("socket.io")(http, {
-//   cors: {
-//     origin: "https://weekend-lesson-last-frontend.onrender.com",
-//   },
-// });
-const socket = require("socket.io")(http);
+const socket = require("socket.io")(http, {
+  cors: {
+    origin: "https://weekend-lesson-last-frontend.onrender.com",
+  },
+});
+
 global.usersOnline = new Map();
 socket.on("connection", async (client) => {
   client.on("Add new user", async (name) => {
